@@ -14,6 +14,6 @@ In order to obtain a scaled-down, easy-to-understand assessment of the impact on
   
 ORGANISATION  
 stored locally (only updated irregularily):  
-Research.xlsx: contains data inventory, parameters influencing discharge, metrics of discharge and a overview about studies
-Citavi, Proyecto_Microcuenca: stores all relevant studies and respective notes
+Research.xlsx: contains data inventory, parameters influencing discharge, metrics of discharge and a overview about studies  
+Citavi, Proyecto_Microcuenca: stores all relevant studies and respective notes  
 cronograma.xlsx: contains the workflow
