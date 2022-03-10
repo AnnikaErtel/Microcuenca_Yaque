@@ -3,6 +3,7 @@
 #Calculating Landcover per Microcuenca 
 #Author: Annika Ertel, (contact: aertel@gmx.net)
 #March 2022- 
+köldvköycx,vö x,ä
 
 
 
