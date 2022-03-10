@@ -1,4 +1,4 @@
-#Script 1 Landcover
+#01_Landcover
 #Microcuenca >< Caudal
 #Calculating Landcover per Microcuenca 
 #Author: Annika Ertel, (contact: aertel@gmx.net)
