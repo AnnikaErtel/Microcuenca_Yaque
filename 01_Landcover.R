@@ -31,8 +31,9 @@ col<-ee$ImageCollection('COPERNICUS/S2_SR') #select satellite
 point <- ee$Geometry$Point(-70.77428, 19.07462) #input point coordinates
 start <- ee$Date("2022-01-01")              #input date
 end <- ee$Date("2022-03-01")                #input date
-filter<-col$filterBounds(point)$filterDate(start,end) #make filter that takes color band with spec time and place
+filter<-col$filterBounds(ee$Geometry(los_dajoas_shape))$filterDate(start,end) #make filter that takes color band with spec time and place
 img <- filter$first()                       #use filter
+
 
 #-Visible RGB ---------------------------------------------------
 #Visualize
@@ -43,6 +44,14 @@ vPar <- list(bands = c("B4", "B3", "B2"),min = 100,max = 8000,
 Map$setCenter(-70.77428, 19.07462, zoom = 10) # Location near Jarabacoa
 map1<- Map$addLayer(img, vPar, "True Color Image")
 map1
+
+geometry <- ee$Geometry$Rectangle(
+  coords = c(-110.8, 44.6, -110.6, 44.7),
+  proj = "EPSG:4326",
+  geodesic = FALSE
+)
+
+raster<-ee_as_raster(img, region = ee$Geometry(los_dajoas_shape), via = "drive")
 
 #-Geology and Soils ---------------------------------------------------
 #MAP SWIR RGB: Geology and soils
@@ -94,12 +103,11 @@ Map$addLayer(ndvi1, ndviPar, "NDVI")+Map$addLayer(ndwi, ndwiPar,
 los_dajoas_shape <- read_sf(dsn = "C:/Users/Annika/Documents/weltwärts/Plan Yaque/Proyecto_Microcuenca/02 Data/Spatial_Data/Map_Watershed_Yaque_Norte", layer= "Los_Dajoas") %>%
   sf_as_ee() #load study area an directly convert it to ee object
 
-# Define an area of interest.
-geometry <- ee$Geometry$Rectangle(
-  coords = c(-70.75, 19.14, -70.66, 19.14),
-  proj = "EPSG:4326",
-  geodesic = FALSE
-)
+
+geom<-ee$Geometry(los_dajoas_shape)
+raster_los_dajoas<-ee_as_raster(image = map1,
+                                region = geom,
+                                via = "drive")
 
 
 mask <- system.file("C:/Users/Annika/Documents/weltwärts/Plan Yaque/Proyecto_Microcuenca/02 Data/Spatial_Data/Map_Watershed_Yaque_Norte/Los_Dajoas.shp", package = "rgee") %>%
