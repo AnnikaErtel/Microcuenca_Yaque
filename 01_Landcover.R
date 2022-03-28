@@ -7,14 +7,21 @@
 #Skript to calculate NDVI & co. earth engine http://amazeone.com.br/barebra/pandora/rgeebookT1eng.pdf
 #rootfolder for EarthEngine: users/annikaert/microcuenca , EE username: annikaert
 
+#SETTING UP####
+library(rgee) #EarthEngine for R 
+       # When working in Rprojects you have to check if the proj is using the right python environment
+       # Tools -> Global options -> python -> select python interpreter -> conda-> choose rgee env.
+#ee_install() #just the first time on new computer
 
-library(rgee) #EarthEngine for R
 library(stars)
 library(tmap)
 
-ee_Initialize() #Initialize once at the beginning of each session
+library(raster) # for working with rasters 
+library(rgdal)  # for working with rasters 
 
-#Search Earth_Engine for data
+ee_Initialize() #Initialize once at the beginning of EACH session!!!
+
+#Search Earth_Engine for data####
 # https://developers.google.com/earth-engine/datasets/catalog
       #take the name from the dataset you want to load from the Earth Engine Snippet
       # the code below (ee.ImageCollection("blabla") is not R code. R code is: ee$ImageCollection('blabla')
@@ -33,8 +40,9 @@ img <- filter$first()                       #use filter
 vPar <- list(bands = c("B4", "B3", "B2"),min = 100,max = 8000,
              gamma = c(1.9,1.7,1.7))
 # Ploting map: center map,mapscale,
-Map$setCenter(-70.77428, 19.07462, zoom = 10)
-Map$addLayer(img, vPar, "True Color Image")
+Map$setCenter(-70.77428, 19.07462, zoom = 10) # Location near Jarabacoa
+map1<- Map$addLayer(img, vPar, "True Color Image")
+map1
 
 #-Geology and Soils ---------------------------------------------------
 #MAP SWIR RGB: Geology and soils
@@ -83,9 +91,33 @@ Map$addLayer(ndvi1, ndviPar, "NDVI")+Map$addLayer(ndwi, ndwiPar,
 # Export Raster of study area ----------
 
 #load study area
-los_dajoas <- read_sf(dsn = "C:/Users/Annika/Documents/weltwärts/Plan Yaque/Proyecto_Microcuenca/02 Data/Spatial_Data/Map_Watershed_Yaque_Norte", layer= "Los_Dajoas")
+los_dajoas_shape <- read_sf(dsn = "C:/Users/Annika/Documents/weltwärts/Plan Yaque/Proyecto_Microcuenca/02 Data/Spatial_Data/Map_Watershed_Yaque_Norte", layer= "Los_Dajoas") %>%
+  sf_as_ee() #load study area an directly convert it to ee object
 
-los_dajoas1<-sf_as_ee(los_dajoas)
-geometry<-ee$geometry(los_dajoas1)
+# Define an area of interest.
+geometry <- ee$Geometry$Rectangle(
+  coords = c(-70.75, 19.14, -70.66, 19.14),
+  proj = "EPSG:4326",
+  geodesic = FALSE
+)
 
-ee_as_raster(ndvi1, region = ee$geometry$los_dajoas1, via = "drive")
+
+mask <- system.file("C:/Users/Annika/Documents/weltwärts/Plan Yaque/Proyecto_Microcuenca/02 Data/Spatial_Data/Map_Watershed_Yaque_Norte/Los_Dajoas.shp", package = "rgee") %>%
+  st_read(quiet = TRUE) %>%
+  sf_as_ee()
+
+region <- mask$geometry()$bounds()
+
+
+image_rgb<- ee$Image(img)$
+  select(c("B4", "B3", "B2"))$
+  divide(10000)
+
+raster_los_dajoas<-ee_as_raster(image = img,
+                                region = geometry,
+                                via = "drive")
+
+plot(raster_los_dajoas$B4)
+
+#ee_as_raster(img,region = ee$geometry$los_dajoas_shape, dsn = "los_dajoas_raster", via = "drive")
+
